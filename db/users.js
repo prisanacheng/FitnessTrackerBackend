@@ -25,11 +25,8 @@ async function getUser({username, password}) {
   const hashedPassword = user.password;
   const passwordsMatch = await bcrypt.compare(password, hashedPassword);
   if (passwordsMatch) {
-    const {rows} = await client.query(`
-      SELECT id, username
-      FROM users
-      `);
-      return rows;
+    delete user.password
+    return user 
 } else {
     return  
 }  
