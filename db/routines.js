@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-catch */
 const client = require("./client");
-const {attachActivitiesToRoutines, getActivityById} = require ("./activities");
+const {attachActivitiesToRoutines} = require ("./activities");
 
 async function createRoutine({ creatorId, isPublic, name, goal}) {
   try {
@@ -116,9 +116,45 @@ async function getPublicRoutinesByActivity({ id }) {
   }
 }
 
-async function updateRoutine({ id, ...fields }) {}
+async function updateRoutine({ id, ...fields }) {
+  const setString = Object.keys(fields).map(
+    (key, index) => `"${key}"=$${index + 1}`
+    ).join(',') 
+    try {
+    if (setString.length > 0){
+      await client.query(`
+      UPDATE routines
+      SET ${setString}
+      WHERE id = ${id}
+      RETURNING *;
+      `, Object.values(fields)) 
+    }
+    return await getRoutineById(id)
+    } catch(error){
+      throw error
+    }
+}
 
-async function destroyRoutine(id) {}
+async function destroyRoutine(id) {
+try {
+  const {rows:[routine_activity]} = await client.query(`
+  DELETE 
+  FROM routine_activities
+  WHERE routine_activities."routineId" = $1
+  `, [id])
+
+  const {rows:[routine]} = await client.query(`
+  DELETE  
+  FROM routines
+  WHERE id = $1;
+  `,[id]);
+  
+  return routine, routine_activity
+} catch(error){
+  throw error
+}
+}
+
 
 module.exports = {
   getRoutineById,
