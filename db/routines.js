@@ -1,5 +1,6 @@
+/* eslint-disable no-useless-catch */
 const client = require("./client");
-const {attachActivitiesToRoutines} = require ("./activities");
+const {attachActivitiesToRoutines, getActivityById} = require ("./activities");
 
 async function createRoutine({ creatorId, isPublic, name, goal}) {
   try {
@@ -10,9 +11,8 @@ async function createRoutine({ creatorId, isPublic, name, goal}) {
     `, [creatorId, isPublic, name, goal])
     return routine;
 } catch(error) {
-    console.error(error)
-}
-  
+    throw error
+}  
 }
 
 async function getRoutineById(id) {
@@ -29,10 +29,9 @@ async function getRoutineById(id) {
             message: "could not find a routine with that id"
         }
     }
-
     return routine
 } catch(error){
-    console.error(error)
+    throw error
 }
 }
 
@@ -43,9 +42,8 @@ async function getRoutinesWithoutActivities() {
     `)
     return rows
   } catch(error){
-    console.error(error)
+    throw error
   }
-
 }
 
 async function getAllRoutines() {
@@ -55,21 +53,72 @@ async function getAllRoutines() {
      FROM routines
     JOIN users ON routines."creatorId"=users.id
     `)
-    // console.log(routines, "this is row, look here")
-    return routines
+    return await attachActivitiesToRoutines(routines)
   } catch(error){
-    console.error(error)
+    throw error
   }
-
 }
 
-async function getAllPublicRoutines() {}
+async function getAllPublicRoutines() {
+  try {
+    const {rows:routines} = await client.query(`
+     SELECT routines.*, users.username AS "creatorName" 
+     FROM routines
+     JOIN users ON routines."creatorId"=users.id
+     WHERE "isPublic"=true
+    `)
+    return await attachActivitiesToRoutines(routines)
+  } catch(error){
+    throw error
+  }
+}
 
-async function getAllRoutinesByUser({ username }) {}
+async function getAllRoutinesByUser({ username }) {
+  try {
+    const {rows:routines} = await client.query(`
+     SELECT routines.*, users.username AS "creatorName" 
+     FROM routines
+     JOIN users ON routines."creatorId"=users.id
+     WHERE username = $1
+    `, [username])
+    return await attachActivitiesToRoutines(routines)
+  } catch(error){
+    throw error
+  }
+}
 
-async function getPublicRoutinesByUser({ username }) {}
+async function getPublicRoutinesByUser({ username }) {
+  try {
+    const {rows:routines} = await client.query(`
+     SELECT routines.*, users.username AS "creatorName" 
+     FROM routines
+     JOIN users ON routines."creatorId"=users.id
+     WHERE username = $1 AND "isPublic"=true
+    `, [username])
+    return await attachActivitiesToRoutines(routines)
+  } catch(error){
+    throw error
+  }
+}
 
-async function getPublicRoutinesByActivity({ id }) {}
+async function getPublicRoutinesByActivity({ id }) {
+  try {
+    const {rows:routines} = await client.query(`
+     SELECT routines.*, users.username AS "creatorName" 
+     FROM routines
+     JOIN users ON routines."creatorId"=users.id
+     JOIN routine_activities ON routines.id=routine_activities."routineId"
+     WHERE "isPublic"=true AND routine_activities."activityId"=$1
+    `, [id]);
+
+
+    return await attachActivitiesToRoutines(routines)
+    
+    
+  } catch(error){
+    throw error
+  }
+}
 
 async function updateRoutine({ id, ...fields }) {}
 
