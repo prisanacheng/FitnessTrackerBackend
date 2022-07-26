@@ -110,11 +110,7 @@ async function getPublicRoutinesByActivity({ id }) {
      JOIN routine_activities ON routines.id=routine_activities."routineId"
      WHERE "isPublic"=true AND routine_activities."activityId"=$1
     `, [id]);
-
-
     return await attachActivitiesToRoutines(routines)
-    
-    
   } catch(error){
     throw error
   }
