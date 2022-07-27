@@ -3,6 +3,8 @@ const express = require("express");
 const usersRouter = express.Router();
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
+const { requireUser } = require("./utils");
+const bcrypt = require('bcrypt');
 const {
     getUserByUsername,
     createUser,
@@ -54,37 +56,43 @@ usersRouter.post("/register", async (req, res, next) => {
 usersRouter.post("/login", async (req, res, next) => {
   const { username, password } = req.body;
 
-  // request must have both
   if (!username || !password) {
     next({
       name: "MissingCredentialsError",
       message: "Please supply both a username and password",
     });
   }
-
   try {
-    const user = await getUser(username, password);
-
-    if (user && user.password == password) {
+    const user = await getUserByUsername(username);
+    const hashedPassword = user.password;
+    const passwordsMatch = await bcrypt.compare(password, hashedPassword);
+    if (passwordsMatch) {
       const token = jwt.sign(
-        { id: `${user.id}`, username: `${username}` },
+        user,
         JWT_SECRET
       );
-      res.send({ message: "you're logged in!", token: token });
+      res.send({ user, message: "you're logged in!", token: token });
     } else {
       next({
         name: "IncorrectCredentialsError",
         message: "Username or password is incorrect",
       });
     }
-  } catch ({ name, message }) {
-    next({ name, message });
+  } catch (error) {
+    next(error);
   }
 });
 
-
-
 // GET /api/users/me
+usersRouter.get("/me", requireUser, async (req, res, next) => {
+  
+  try {
+    res.send(req.user)
+   
+  } catch (error) {
+    next(error);
+  }
+});
 
 // GET /api/users/:username/routines
 
