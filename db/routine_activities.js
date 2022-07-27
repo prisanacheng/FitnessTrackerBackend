@@ -1,6 +1,7 @@
+/* eslint-disable no-empty */
 /* eslint-disable no-useless-catch */
 const client = require("./client");
-const {attachActivitiesToRoutines} = require ("./activities");
+
 
 async function addActivityToRoutine({
   routineId,
@@ -15,7 +16,6 @@ async function addActivityToRoutine({
     ON CONFLICT ("routineId", "activityId") DO NOTHING
     RETURNING *;
     `,[routineId, activityId, duration, count])
-    // console.log (routine_activity, "thisi is a routine_activity")
    return routine_activity  
    }catch (error){
      console.error(error)
@@ -98,7 +98,20 @@ async function destroyRoutineActivity(id) {
 
 }
 
-async function canEditRoutineActivity(routineActivityId, userId) {}
+async function canEditRoutineActivity(routineActivityId, userId) {
+ try{
+   const {rows: [routine_activity]} = await client.query(`
+   SELECT *
+   FROM routine_activities
+   JOIN routines ON routine_activities."routineId" = routines.id AND routine_activities.id = $1
+  
+   `,[routineActivityId])
+  return routine_activity.creatorId === userId
+  
+ } catch(error){
+throw error
+ }
+}
 
 module.exports = {
   getRoutineActivityById,
