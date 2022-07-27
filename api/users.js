@@ -6,6 +6,7 @@ const { JWT_SECRET } = process.env;
 const {
     getUserByUsername,
     createUser,
+    getUser,
   } = require("../db");
 
 usersRouter.post("/register", async (req, res, next) => {
@@ -50,6 +51,38 @@ usersRouter.post("/register", async (req, res, next) => {
   });
 
 // POST /api/users/login
+usersRouter.post("/login", async (req, res, next) => {
+  const { username, password } = req.body;
+
+  // request must have both
+  if (!username || !password) {
+    next({
+      name: "MissingCredentialsError",
+      message: "Please supply both a username and password",
+    });
+  }
+
+  try {
+    const user = await getUser(username, password);
+
+    if (user && user.password == password) {
+      const token = jwt.sign(
+        { id: `${user.id}`, username: `${username}` },
+        JWT_SECRET
+      );
+      res.send({ message: "you're logged in!", token: token });
+    } else {
+      next({
+        name: "IncorrectCredentialsError",
+        message: "Username or password is incorrect",
+      });
+    }
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
+
+
 
 // GET /api/users/me
 
