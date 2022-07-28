@@ -37,7 +37,7 @@ async function getActivityById(id) {
     if(!activity){
         throw {
             name: "ActivityNotFoundError",
-            message: "could not find an activty with that id"
+            message: `Activity ${id} not found`
         }
     }
 
