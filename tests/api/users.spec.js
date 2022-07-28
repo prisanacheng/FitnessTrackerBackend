@@ -229,13 +229,14 @@ describe("/api/users", () => {
       const { fakeUser, token } = await createFakeUserWithRoutinesAndActivities(
         "Greg"
       );
+      
       // Create a second user to check against
       const sean = await createFakeUserWithRoutinesAndActivities("Sean");
-
+       
       const response = await request(app)
         .get(`/api/users/${sean.fakeUser.username}/routines`)
         .set("Authorization", `Bearer ${token}`);
-
+        
       expectNotToBeError(response.body);
 
       // Get the routines from the DB
