@@ -36,7 +36,6 @@ router.use(async (req, res, next) => {
 router.use((req, res, next) =>{
      if(req.user){
         res.send(req.user)
-
      }
      next()
 })

@@ -9,6 +9,9 @@ const {
     getUserByUsername,
     createUser,
     getUser,
+    getPublicRoutinesByUser,
+    getAllRoutinesByUser,
+    getRoutineActivityById
   } = require("../db");
 
 usersRouter.post("/register", async (req, res, next) => {
@@ -85,15 +88,32 @@ usersRouter.post("/login", async (req, res, next) => {
 
 // GET /api/users/me
 usersRouter.get("/me", requireUser, async (req, res, next) => {
-  
   try {
     res.send(req.user)
-   
+    res.status(401)
   } catch (error) {
     next(error);
   }
 });
 
-// GET /api/users/:username/routines
-
+usersRouter.get('/:username/routines', async (req,res, next) => {
+  const username = req.params
+  try{
+      const userAllRoutines = await getAllRoutinesByUser(username)
+      const userAllActivites = userAllRoutines.filter(element=>{
+        return element.activities
+      })
+      const userPubRoutines = await getPublicRoutinesByUser(username)
+      console.log(userAllRoutines, "this are all routinessssssssss")
+      // const activities = userRoutines.activites.routine_activity
+      console.log(userPubRoutines, "these are public routines I thinkkkk")
+      
+        
+      res.send({
+        userPubRoutines, userAllActivites
+      })
+  } catch({name, message}){
+      next({name, message})
+  }
+})
 module.exports = usersRouter;
