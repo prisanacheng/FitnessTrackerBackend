@@ -43,7 +43,7 @@ activitiesRouter.patch('/:activityId', requireUser,  async (req,res,next)=>{
 
     const updateFields = {}
 
-   
+   try{
     if(name){
         updateFields.name = name
     }
@@ -52,20 +52,22 @@ activitiesRouter.patch('/:activityId', requireUser,  async (req,res,next)=>{
         updateFields.description = description
     }
 
-    try{
-        const originalActivity = await getActivityById(activityId)
-        console.log(originalActivity, "og activityyyyyy")
-        if(originalActivity.author.id === req.user.id){
-            const updatedPost = await updatePost(postId, updateFields)
-            res.send({post: updatedPost})
-        } else {
+    const originalActivityName = await getActivityByName(name)
+        if(originalActivityName){
             next({
-                name: "UnauthorizedUserError",
-                message: "you cannot update a post that is not yours"
-            })
+                name: "ActivityUpdateError",
+                message: `An activity with name ${name} already exists`})
+        } else{
+        const updatedActivity = await updateActivity(activityId, updateFields)
+        if(updatedActivity){
+            res.send(updatedActivity)
+        }} else {
+        next({
+            name: "ActivityUpdateError",
+            message: `Error updating activity`})
         }
-    } catch({name, message}){
-        next({name, message})
+    } catch ({ name, message }){
+        next({ name, message });
     }
 })
 
