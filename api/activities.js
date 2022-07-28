@@ -14,8 +14,8 @@ activitiesRouter.get('/', async (req,res) => {
 })
 
 activitiesRouter.post('/', requireUser, async (req, res, next)=>{
-    const { name, description = "" } = req.body;
-
+    const { name, description = "" } = req.body
+    
     try{
         const activityName = await getActivityByName(name)
         if(activityName){
