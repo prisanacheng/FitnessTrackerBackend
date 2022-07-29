@@ -23,12 +23,6 @@ async function getRoutineById(id) {
     WHERE id = $1;
     `,[id]);
 
-    if(!routine){
-        throw {
-            name: "RoutineNotFoundError",
-            message: "could not find a routine with that id"
-        }
-    }
     return routine
 } catch(error){
     throw error
@@ -140,20 +134,19 @@ try {
   const {rows:[routine_activity]} = await client.query(`
   DELETE 
   FROM routine_activities
-  WHERE routine_activities."routineId" = $1
-  `, [id])
+  WHERE routine_activities."routineId" = ${id}
+  `)
 
   const {rows:[routine]} = await client.query(`
   DELETE  
   FROM routines
-  WHERE id = $1;
-  `,[id]);
+  WHERE id = ${id}
+  `);
   
   return routine, routine_activity
 } catch(error){
   throw error
-}
-}
+}}
 
 
 module.exports = {
@@ -166,5 +159,21 @@ module.exports = {
   getPublicRoutinesByActivity,
   createRoutine,
   updateRoutine,
-  destroyRoutine,
+  destroyRoutine
 };
+
+
+
+
+// await client.query(`
+// DELETE FROM routine_activities
+// WHERE routine_activities."routineId" = ${id}
+// `)
+
+// await client.query(`
+// DELETE FROM routines
+// WHERE id = ${id}
+// `);
+
+
+// }

@@ -56,23 +56,22 @@ routinesRouter.patch("/:routineId", requireUser, async (req, res, next) => {
 
 
 // DELETE /api/routines/:routineId
-routinesRouter.delete('/:routineId', requireUser, async (req, res, next) => {
+routinesRouter.delete("/:routineId", requireUser, async (req, res, next) => {
     const id = req.params.routineId
+   
     try {
+    
       const routine = await getRoutineById(id);
-      
-      if (routine.creatorId !== req.user.id) {
+      if (routine.creatorId != req.user.id) {
        res.status(403)  
         next({ 
             name: "UnauthorizedUserError",
-            message: `User ${req.user.username} is not allowed to delete ${routine.name}`
+            message: `User ${req.user.username} is not allowed to delete ${routine.name}`,
           });
       } else {
-        const deletedRoutine = await destroyRoutine(id, {active: false});
-        console.log(deletedRoutine, "deleteddddddd")
-        res.send({ deletedRoutine });
+        const deletedRoutine = await destroyRoutine(routine.id);
+        res.send(routine);
       }
-  
     } catch ({ name, message }) {
       next({ name, message })
     }
