@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const {
     destroyRoutineActivity,
-    canEditRoutineActivity,
     getRoutineActivityById,
     updateRoutineActivity,
     getRoutineById
@@ -35,5 +34,25 @@ router.patch("/:routineActivityId", requireUser, async (req, res, next) => {
   });
   
 // DELETE /api/routine_activities/:routineActivityId
+router.delete("/:routineActivityId", requireUser, async (req, res, next) => {
+    const id = req.params.routineActivityId
+    
+    try {
+      const routineAct = await getRoutineActivityById(id);
+      const neededRoutine = await getRoutineById(routineAct.routineId)
+      if (neededRoutine.creatorId != req.user.id) {
+       res.status(403)  
+        next({ 
+            name: "UnauthorizedUserError",
+            message: `User ${req.user.username} is not allowed to delete ${neededRoutine.name}`,
+          });
+      } else {
+        await destroyRoutineActivity(routineAct.id);
+        res.send(routineAct);
+      }
+    } catch ({ name, message }) {
+      next({ name, message })
+    }
+  });
 
 module.exports = router;

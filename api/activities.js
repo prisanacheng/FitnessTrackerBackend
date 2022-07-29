@@ -11,24 +11,21 @@ const {
 const { requireUser } = require("./utils");
 
 // GET /api/activities/:activityId/routines
-activitiesRouter.get("/:activityId/routines", async (req, res, next)=>{
-    const { activityId } = req.params;
-    try{
-        const activities = await getPublicRoutinesByActivity({ id: activityId })
-        
-        if(activities.length === 0){
-            next({
-                name: "ActivityDoesNotExistError",
-                message: `Activity ${activityId} not found`,
-            })
-        } else(
-            res.send(activities)
-        )
-    } catch ({name, message}){
-        next({name, message})
-    }
+activitiesRouter.get("/:activityId/routines", async (req, res, next) => {
+  const { activityId } = req.params;
+  try {
+    const activities = await getPublicRoutinesByActivity({ id: activityId });
 
-})
+    if (activities.length === 0) {
+      next({
+        name: "ActivityDoesNotExistError",
+        message: `Activity ${activityId} not found`,
+      });
+    } else res.send(activities);
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
 
 activitiesRouter.get("/", async (req, res) => {
   const allActivities = await getAllActivities();
@@ -65,13 +62,10 @@ activitiesRouter.post("/", requireUser, async (req, res, next) => {
 activitiesRouter.patch("/:activityId", requireUser, async (req, res, next) => {
   const { activityId } = req.params;
   const { name, description } = req.body;
-
   const updateFields = { id: activityId };
-
   if (name) {
     updateFields.name = name;
   }
-
   if (description) {
     updateFields.description = description;
   }

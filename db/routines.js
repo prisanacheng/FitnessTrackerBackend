@@ -165,15 +165,3 @@ module.exports = {
 
 
 
-// await client.query(`
-// DELETE FROM routine_activities
-// WHERE routine_activities."routineId" = ${id}
-// `)
-
-// await client.query(`
-// DELETE FROM routines
-// WHERE id = ${id}
-// `);
-
-
-// }

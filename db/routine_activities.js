@@ -18,7 +18,7 @@ async function addActivityToRoutine({
     `,[routineId, activityId, duration, count])
    return routine_activity  
    }catch (error){
-     console.error(error)
+     throw error
    }
 }
 
@@ -30,12 +30,7 @@ async function getRoutineActivityById(id) {
     WHERE id = $1;
     `,[id]);
 
-    if(!routine_activity){
-        throw {
-            name: "RoutineNotFoundError",
-            message: "could not find a routine with that id"
-        }
-    }
+    
     return routine_activity
 } catch(error){
     throw error
@@ -50,12 +45,7 @@ async function getRoutineActivitiesByRoutine({ id }) {
       WHERE routine_activities.id = ${id};
       `);
   
-      if(!routine_activity){
-          throw {
-              name: "Routine_activityNotFoundError",
-              message: "could not find a routine_activity with that id"
-          }
-      }   
+
     return routine_activity
   } catch(error){
     throw error
