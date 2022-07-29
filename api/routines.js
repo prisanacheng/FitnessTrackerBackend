@@ -87,6 +87,7 @@ routinesRouter.post("/:routineId/activities", requireUser, async (req, res, next
     const { activityId, duration, count } = req.body;
     const { routineId } = req.params;
     const routineActId = await getRoutineActivityById(activityId);
+    
     try {
       if (routineActId) {
         next({
